@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Icon Generator</title>
+</head>
+<body>
+    <canvas id="canvas192" width="192" height="192" style="border: 1px solid #000;"></canvas>
+    <canvas id="canvas512" width="512" height="512" style="border: 1px solid #000;"></canvas>
+
+    <script>
+        // Create 192x192 icon
+        const canvas192 = document.getElementById('canvas192');
+        const ctx192 = canvas192.getContext('2d');
+
+        // Background
+        ctx192.fillStyle = '#3498db';
+        ctx192.fillRect(0, 0, 192, 192);
+
+        // Book shape
+        ctx192.fillStyle = '#ffffff';
+        ctx192.fillRect(48, 40, 96, 112);
+
+        // Book spine
+        ctx192.fillStyle = '#2980b9';
+        ctx192.fillRect(48, 40, 12, 112);
+
+        // Pages
+        ctx192.strokeStyle = '#3498db';
+        ctx192.lineWidth = 2;
+        ctx192.beginPath();
+        ctx192.moveTo(72, 60);
+        ctx192.lineTo(132, 60);
+        ctx192.moveTo(72, 80);
+        ctx192.lineTo(132, 80);
+        ctx192.moveTo(72, 100);
+        ctx192.lineTo(132, 100);
+        ctx192.moveTo(72, 120);
+        ctx192.lineTo(132, 120);
+        ctx192.stroke();
+
+        // Create 512x512 icon
+        const canvas512 = document.getElementById('canvas512');
+        const ctx512 = canvas512.getContext('2d');
+
+        // Background
+        ctx512.fillStyle = '#3498db';
+        ctx512.fillRect(0, 0, 512, 512);
+
+        // Book shape
+        ctx512.fillStyle = '#ffffff';
+        ctx512.fillRect(128, 106, 256, 300);
+
+        // Book spine
+        ctx512.fillStyle = '#2980b9';
+        ctx512.fillRect(128, 106, 32, 300);
+
+        // Pages
+        ctx512.strokeStyle = '#3498db';
+        ctx512.lineWidth = 6;
+        ctx512.beginPath();
+        ctx512.moveTo(192, 160);
+        ctx512.lineTo(352, 160);
+        ctx512.moveTo(192, 200);
+        ctx512.lineTo(352, 200);
+        ctx512.moveTo(192, 240);
+        ctx512.lineTo(352, 240);
+        ctx512.moveTo(192, 280);
+        ctx512.lineTo(352, 280);
+        ctx512.moveTo(192, 320);
+        ctx512.lineTo(352, 320);
+        ctx512.stroke();
+
+        // Download function
+        function downloadCanvas(canvas, filename) {
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+
+        // Auto-download both icons
+        setTimeout(() => {
+            downloadCanvas(canvas192, 'icon-192.png');
+            setTimeout(() => {
+                downloadCanvas(canvas512, 'icon-512.png');
+            }, 1000);
+        }, 1000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,27 @@
+{
+  "name": "EPUB Reader",
+  "short_name": "EPUB Reader",
+  "description": "A simple EPUB reader with AI-powered chapter summaries",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f5f5f5",
+  "theme_color": "#3498db",
+  "orientation": "portrait-primary",
+  "scope": "./",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable any"
+    }
+  ],
+  "categories": ["books", "education", "utilities"],
+  "screenshots": []
+}

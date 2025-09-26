@@ -243,8 +243,92 @@ class EpubReader {
     }
 
     formatSummary(text) {
-        // Simple formatting - just handle newlines
-        return text.replace(/\n/g, '<br>');
+        // Convert markdown to HTML
+        let html = text;
+
+        // Convert headings
+        html = html.replace(/^### (.+)$/gm, '<h3>$1</h3>');
+        html = html.replace(/^## (.+)$/gm, '<h2>$1</h2>');
+
+        // Convert bold and italic text
+        html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+        html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
+
+        // Convert bullet points to unordered lists
+        html = html.replace(/^- (.+)$/gm, '<li>$1</li>');
+
+        // Wrap consecutive list items in <ul> tags
+        html = html.replace(/(<li>.*<\/li>)/gs, function(match) {
+            // Split by newlines and process
+            const lines = match.split('\n');
+            let result = '';
+            let inList = false;
+
+            for (let line of lines) {
+                line = line.trim();
+                if (line.startsWith('<li>') && line.endsWith('</li>')) {
+                    if (!inList) {
+                        result += '<ul>\n';
+                        inList = true;
+                    }
+                    result += line + '\n';
+                } else if (inList && line === '') {
+                    continue; // Skip empty lines within lists
+                } else {
+                    if (inList) {
+                        result += '</ul>\n';
+                        inList = false;
+                    }
+                    if (line) {
+                        result += line + '\n';
+                    }
+                }
+            }
+
+            if (inList) {
+                result += '</ul>\n';
+            }
+
+            return result;
+        });
+
+        // Convert paragraphs (wrap non-tag lines in <p> tags)
+        html = html.replace(/\n\n+/g, '\n\n'); // Normalize multiple newlines
+        const lines = html.split('\n');
+        let result = '';
+        let currentParagraph = '';
+
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i].trim();
+
+            // Skip empty lines
+            if (line === '') {
+                if (currentParagraph) {
+                    result += '<p>' + currentParagraph.trim() + '</p>\n';
+                    currentParagraph = '';
+                }
+                continue;
+            }
+
+            // Check if line is already an HTML tag
+            if (line.match(/^<(h[1-6]|ul|li|\/ul)>/)) {
+                if (currentParagraph) {
+                    result += '<p>' + currentParagraph.trim() + '</p>\n';
+                    currentParagraph = '';
+                }
+                result += line + '\n';
+            } else {
+                // Add to current paragraph
+                currentParagraph += (currentParagraph ? ' ' : '') + line;
+            }
+        }
+
+        // Handle any remaining paragraph
+        if (currentParagraph) {
+            result += '<p>' + currentParagraph.trim() + '</p>\n';
+        }
+
+        return result.trim();
     }
 
     async callOpenAI(apiKey, chapterText) {
@@ -259,7 +343,17 @@ class EpubReader {
                 messages: [
                     {
                         role: 'user',
-                        content: `Please provide a well-structured summary of the following chapter in markdown format. Use bullet points, proper paragraphs, and clear formatting:\n\n${chapterText}`
+                        content: `Please provide a well-structured summary of the following chapter. Use only these markdown formats:
+- Use ## for main headings
+- Use ### for subheadings
+- Use **bold text** for emphasis
+- Use *italic text* for secondary emphasis
+- Use - for bullet points (single level only)
+- Use regular paragraphs
+
+Do not use code blocks, tables, links, or other markdown formatting. Keep it simple and well-structured.
+
+Chapter content:\n\n${chapterText}`
                     }
                 ],
                 max_tokens: 600,
@@ -276,6 +370,19 @@ class EpubReader {
         return data.choices[0]?.message?.content || 'No summary generated.';
     }
 
+}
+
+// Register service worker for PWA functionality
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+            .then((registration) => {
+                console.log('SW registered: ', registration);
+            })
+            .catch((registrationError) => {
+                console.log('SW registration failed: ', registrationError);
+            });
+    });
 }
 
 // Initialize the EPUB reader when the page loads

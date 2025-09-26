@@ -5,6 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EPUB Reader</title>
     <link rel="icon" type="image/x-icon" href="favicon.ico">
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+
+    <!-- iOS specific meta tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="EPUB Reader">
+    <link rel="apple-touch-icon" href="icon-192.png">
+
+    <!-- Theme color -->
+    <meta name="theme-color" content="#3498db">
+    <meta name="msapplication-TileColor" content="#3498db">
+
     <script src="https://cdn.jsdelivr.net/npm/jszip@3/dist/jszip.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/epubjs/dist/epub.min.js"></script>
     <link rel="stylesheet" href="style.css">
@@ -39,7 +53,7 @@
     <!-- Reading Screen -->
     <div id="reading-screen" class="screen">
         <div class="reading-header">
-            <button id="back-btn" class="back-button">←</button>
+            <button id="back-btn" class="back-button">Back</button>
             <button id="tldr-btn" class="tldr-button">TL;DR</button>
         </div>
         <div id="summary-container" class="summary-container" style="display: none;">

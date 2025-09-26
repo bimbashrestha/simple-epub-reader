@@ -218,6 +218,115 @@ body {
     cursor: not-allowed;
 }
 
+.tldr-button {
+    background-color: var(--button-secondary);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background-color 0.3s ease;
+}
+
+.tldr-button:hover {
+    background-color: var(--button-secondary-hover);
+}
+
+.tldr-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.summary-container {
+    max-width: 800px;
+    margin: 0 auto 1rem auto;
+    background-color: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: 0 2px 8px var(--shadow);
+}
+
+.summary-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    background-color: var(--success-color);
+    color: white;
+    border-radius: 8px 8px 0 0;
+}
+
+.summary-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+.close-summary-button {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background-color 0.2s ease;
+}
+
+.close-summary-button:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.summary-content {
+    padding: 1.5rem;
+    line-height: 1.7;
+    font-size: 1rem;
+}
+
+.summary-content p {
+    margin: 0 0 1rem 0;
+    text-align: left;
+}
+
+.summary-content p:last-child {
+    margin-bottom: 0;
+}
+
+.summary-content ul,
+.summary-content ol {
+    margin: 1rem 0;
+    padding-left: 1.5rem;
+}
+
+.summary-content li {
+    margin: 0.5rem 0;
+}
+
+.summary-content h1,
+.summary-content h2,
+.summary-content h3,
+.summary-content h4,
+.summary-content h5,
+.summary-content h6 {
+    margin: 1.5rem 0 1rem 0;
+    color: var(--text-secondary);
+}
+
+.summary-content strong {
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+
+.summary-content em {
+    font-style: italic;
+    color: var(--text-tertiary);
+}
+
 .chapter-content {
     max-width: 800px;
     margin: 0 auto;
@@ -283,5 +392,22 @@ body {
     .copy-button {
         font-size: 0.8rem;
         padding: 0.4rem 0.8rem;
+    }
+
+    .tldr-button {
+        font-size: 0.8rem;
+        padding: 0.4rem 0.8rem;
+    }
+
+    .summary-container {
+        margin: 0 1rem 1rem 1rem;
+    }
+
+    .summary-header {
+        padding: 0.8rem 1rem;
+    }
+
+    .summary-content {
+        padding: 1rem;
     }
 }

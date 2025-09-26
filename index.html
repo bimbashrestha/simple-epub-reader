@@ -39,7 +39,17 @@
     <!-- Reading Screen -->
     <div id="reading-screen" class="screen">
         <div class="reading-header">
-            <button id="back-btn" class="back-button">← Back to Contents</button>
+            <button id="back-btn" class="back-button">←</button>
+            <button id="tldr-btn" class="tldr-button">TL;DR</button>
+        </div>
+        <div id="summary-container" class="summary-container" style="display: none;">
+            <div class="summary-header">
+                <h3>Chapter Summary</h3>
+                <button id="close-summary-btn" class="close-summary-button">×</button>
+            </div>
+            <div id="summary-content" class="summary-content">
+                <!-- Summary will be displayed here -->
+            </div>
         </div>
         <div id="chapter-content" class="chapter-content">
             <!-- Chapter content will be displayed here -->

@@ -17,6 +17,10 @@ class EpubReader {
         this.tocList = document.getElementById('toc-list');
         this.backBtn = document.getElementById('back-btn');
         this.chapterContent = document.getElementById('chapter-content');
+        this.tldrBtn = document.getElementById('tldr-btn');
+        this.summaryContainer = document.getElementById('summary-container');
+        this.summaryContent = document.getElementById('summary-content');
+        this.closeSummaryBtn = document.getElementById('close-summary-btn');
     }
 
     attachEventListeners() {
@@ -30,6 +34,14 @@ class EpubReader {
 
         this.backBtn.addEventListener('click', () => {
             this.showScreen('toc');
+        });
+
+        this.tldrBtn.addEventListener('click', () => {
+            this.summarizeChapter();
+        });
+
+        this.closeSummaryBtn.addEventListener('click', () => {
+            this.summaryContainer.style.display = 'none';
         });
 
         // Handle Cmd+A / Ctrl+A to select chapter content only
@@ -119,6 +131,12 @@ class EpubReader {
             const scripts = tempDiv.querySelectorAll('script');
             scripts.forEach(script => script.remove());
 
+            // Remove or handle CSS links to prevent 404 errors
+            const cssLinks = tempDiv.querySelectorAll('link[rel="stylesheet"]');
+            cssLinks.forEach((link) => {
+                link.remove();
+            });
+
             // Update image sources to work with the EPUB
             const images = tempDiv.querySelectorAll('img');
             images.forEach(async (img) => {
@@ -181,6 +199,81 @@ class EpubReader {
         range.selectNodeContents(this.chapterContent);
         selection.removeAllRanges();
         selection.addRange(range);
+    }
+
+    async summarizeChapter() {
+        if (this.currentScreen !== 'reading') return;
+
+        // Get API key from user
+        const apiKey = await this.getOpenAIApiKey();
+        if (!apiKey) return;
+
+        // Show loading state
+        this.summaryContainer.style.display = 'block';
+        this.summaryContent.innerHTML = '<p>Generating summary...</p>';
+
+        try {
+            // Extract text content from the chapter
+            const chapterText = this.chapterContent.innerText || this.chapterContent.textContent;
+
+            // Call OpenAI API
+            const summary = await this.callOpenAI(apiKey, chapterText);
+
+            // Display the summary with proper formatting
+            this.summaryContent.innerHTML = this.formatSummary(summary);
+        } catch (error) {
+            console.error('Error generating summary:', error);
+            this.summaryContent.innerHTML = `<p style="color: red;">Error generating summary: ${error.message}</p>`;
+        }
+    }
+
+    async getOpenAIApiKey() {
+        // Check if we already have a stored API key (for this session)
+        if (this.openaiApiKey) {
+            return this.openaiApiKey;
+        }
+
+        // Prompt user for API key
+        const apiKey = prompt('Please enter your OpenAI API key:');
+        if (apiKey && apiKey.trim()) {
+            this.openaiApiKey = apiKey.trim();
+            return this.openaiApiKey;
+        }
+        return null;
+    }
+
+    formatSummary(text) {
+        // Simple formatting - just handle newlines
+        return text.replace(/\n/g, '<br>');
+    }
+
+    async callOpenAI(apiKey, chapterText) {
+        const response = await fetch('https://api.openai.com/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${apiKey}`
+            },
+            body: JSON.stringify({
+                model: 'gpt-4o-mini',
+                messages: [
+                    {
+                        role: 'user',
+                        content: `Please provide a well-structured summary of the following chapter in markdown format. Use bullet points, proper paragraphs, and clear formatting:\n\n${chapterText}`
+                    }
+                ],
+                max_tokens: 600,
+                temperature: 0.7
+            })
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error?.message || `HTTP ${response.status}`);
+        }
+
+        const data = await response.json();
+        return data.choices[0]?.message?.content || 'No summary generated.';
     }
 
 }

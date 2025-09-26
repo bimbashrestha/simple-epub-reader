@@ -42,7 +42,31 @@
     <div id="toc-screen" class="screen">
         <div class="toc-container">
             <div class="toc-header">
+                <div class="toc-header-buttons">
+                    <button id="upload-another-btn" class="back-button">Back</button>
+                    <button id="summarize-book-btn" class="summarize-button">Summarize</button>
+                </div>
                 <h1 id="book-title">Table of Contents</h1>
+            </div>
+            <div id="summary-progress" class="summary-progress" style="display: none;">
+                <div class="progress-header">
+                    <h3>Summarizing Book</h3>
+                </div>
+                <div class="progress-content">
+                    <div id="progress-text">Starting summarization...</div>
+                    <div class="progress-bar">
+                        <div id="progress-fill" class="progress-fill" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+            <div id="book-summary-container" class="book-summary-container" style="display: none;">
+                <div class="summary-header">
+                    <h3>Book Summary</h3>
+                    <button id="close-book-summary-btn" class="close-summary-button">×</button>
+                </div>
+                <div id="book-summary-content" class="summary-content">
+                    <!-- Book summary will be displayed here -->
+                </div>
             </div>
             <div id="toc-list" class="toc-list">
                 <!-- TOC items will be populated here -->
@@ -54,7 +78,7 @@
     <div id="reading-screen" class="screen">
         <div class="reading-header">
             <button id="back-btn" class="back-button">Back</button>
-            <button id="tldr-btn" class="tldr-button">TL;DR</button>
+            <button id="tldr-btn" class="tldr-button">Summarize</button>
         </div>
         <div id="summary-container" class="summary-container" style="display: none;">
             <div class="summary-header">

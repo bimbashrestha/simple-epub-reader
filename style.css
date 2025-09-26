@@ -20,6 +20,7 @@
     --button-secondary: #95a5a6;
     --button-secondary-hover: #7f8c8d;
     --shadow: rgba(0, 0, 0, 0.1);
+    --success-color: #27ae60;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -39,6 +40,7 @@
         --button-secondary: #666666;
         --button-secondary-hover: #777777;
         --shadow: rgba(0, 0, 0, 0.3);
+        --success-color: #27ae60;
     }
 }
 
@@ -115,11 +117,19 @@ body {
     padding: 2rem;
 }
 
-.toc-container h1 {
-    font-size: 2rem;
+.toc-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.toc-header h1 {
+    font-size: 2rem;
     color: var(--text-secondary);
-    text-align: center;
+    margin: 0;
 }
 
 .toc-list {
@@ -167,6 +177,9 @@ body {
     position: sticky;
     top: 0;
     z-index: 100;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .back-button {
@@ -182,6 +195,27 @@ body {
 
 .back-button:hover {
     background-color: var(--button-secondary-hover);
+}
+
+.copy-button {
+    background-color: var(--accent-color);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background-color 0.3s ease;
+    white-space: nowrap;
+}
+
+.copy-button:hover {
+    background-color: var(--accent-hover);
+}
+
+.copy-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
 }
 
 .chapter-content {
@@ -236,5 +270,18 @@ body {
 
     .reading-header {
         padding: 0.5rem 1rem;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .toc-header {
+        flex-direction: column;
+        align-items: stretch;
+        text-align: center;
+    }
+
+    .copy-button {
+        font-size: 0.8rem;
+        padding: 0.4rem 0.8rem;
     }
 }

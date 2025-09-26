@@ -17,6 +17,8 @@ class EpubReader {
         this.tocList = document.getElementById('toc-list');
         this.backBtn = document.getElementById('back-btn');
         this.chapterContent = document.getElementById('chapter-content');
+        this.copyChapterBtn = document.getElementById('copy-chapter-btn');
+        this.copyBookBtn = document.getElementById('copy-book-btn');
     }
 
     attachEventListeners() {
@@ -30,6 +32,24 @@ class EpubReader {
 
         this.backBtn.addEventListener('click', () => {
             this.showScreen('toc');
+        });
+
+        this.copyChapterBtn.addEventListener('click', () => {
+            this.copyChapterText();
+        });
+
+        this.copyBookBtn.addEventListener('click', () => {
+            this.copyEntireBook();
+        });
+
+        // Handle Cmd+A / Ctrl+A to select chapter content only
+        document.addEventListener('keydown', (event) => {
+            if ((event.metaKey || event.ctrlKey) && event.key === 'a') {
+                if (this.currentScreen === 'reading') {
+                    event.preventDefault();
+                    this.selectChapterText();
+                }
+            }
         });
     }
 
@@ -159,6 +179,123 @@ class EpubReader {
         }
 
         this.currentScreen = screenName;
+    }
+
+    selectChapterText() {
+        if (this.currentScreen !== 'reading') return;
+
+        const selection = window.getSelection();
+        const range = document.createRange();
+
+        // Select only the text content within the chapter-content div
+        range.selectNodeContents(this.chapterContent);
+        selection.removeAllRanges();
+        selection.addRange(range);
+    }
+
+    async copyChapterText() {
+        if (this.currentScreen !== 'reading') return;
+
+        try {
+            // Get the plain text content of the chapter
+            const chapterText = this.chapterContent.innerText || this.chapterContent.textContent || '';
+
+            // Copy to clipboard using the modern Clipboard API
+            await navigator.clipboard.writeText(chapterText);
+
+            // Provide visual feedback
+            this.showCopyFeedback(this.copyChapterBtn, 'Chapter Copied!');
+        } catch (error) {
+            console.error('Failed to copy chapter text:', error);
+
+            // Fallback: select the text so user can manually copy
+            this.selectChapterText();
+            alert('Could not automatically copy. The text has been selected - please use Cmd+C or Ctrl+C to copy.');
+        }
+    }
+
+    async copyEntireBook() {
+        if (!this.book) return;
+
+        try {
+            // Show loading feedback
+            const originalText = this.copyBookBtn.textContent;
+            this.copyBookBtn.textContent = 'Copying...';
+            this.copyBookBtn.disabled = true;
+
+            let fullBookText = '';
+
+            // Get metadata first
+            const metadata = await this.book.loaded.metadata;
+            if (metadata.title) {
+                fullBookText += `${metadata.title}\n`;
+                if (metadata.creator) {
+                    fullBookText += `by ${metadata.creator}\n`;
+                }
+                fullBookText += '\n' + '='.repeat(50) + '\n\n';
+            }
+
+            // Get all spine items (chapters in reading order)
+            const spine = this.book.spine;
+
+            for (let i = 0; i < spine.length; i++) {
+                const section = spine.get(i);
+
+                try {
+                    const contents = await section.load(this.book.load.bind(this.book));
+
+                    // Create a temporary div to process the content
+                    const tempDiv = document.createElement('div');
+                    const serializer = new XMLSerializer();
+                    tempDiv.innerHTML = serializer.serializeToString(contents);
+
+                    // Remove script tags and other non-text elements
+                    const scripts = tempDiv.querySelectorAll('script, style');
+                    scripts.forEach(script => script.remove());
+
+                    // Get the text content
+                    const chapterText = tempDiv.innerText || tempDiv.textContent || '';
+
+                    if (chapterText.trim()) {
+                        fullBookText += chapterText.trim() + '\n\n';
+                    }
+
+                    // Add a separator between chapters
+                    if (i < spine.length - 1) {
+                        fullBookText += '─'.repeat(30) + '\n\n';
+                    }
+                } catch (error) {
+                    console.warn(`Could not load chapter ${i + 1}:`, error);
+                }
+            }
+
+            // Copy to clipboard
+            await navigator.clipboard.writeText(fullBookText);
+
+            // Restore button and show success feedback
+            this.copyBookBtn.disabled = false;
+            this.showCopyFeedback(this.copyBookBtn, 'Book Copied!', originalText);
+
+        } catch (error) {
+            console.error('Failed to copy entire book:', error);
+
+            // Restore button
+            this.copyBookBtn.textContent = 'Copy Entire Book';
+            this.copyBookBtn.disabled = false;
+
+            alert('Could not copy the entire book. Please try copying individual chapters instead.');
+        }
+    }
+
+    showCopyFeedback(button, successText, originalText = null) {
+        const original = originalText || button.textContent;
+        button.textContent = successText;
+        button.style.backgroundColor = 'var(--success-color, #27ae60)';
+
+        setTimeout(() => {
+            button.textContent = original;
+            button.style.backgroundColor = '';
+        }, 2000);
     }
 }
 

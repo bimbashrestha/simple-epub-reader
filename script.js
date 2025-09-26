@@ -1,0 +1,168 @@
+class EpubReader {
+    constructor() {
+        this.book = null;
+        this.currentScreen = 'upload';
+        this.initializeElements();
+        this.attachEventListeners();
+    }
+
+    initializeElements() {
+        this.uploadScreen = document.getElementById('upload-screen');
+        this.tocScreen = document.getElementById('toc-screen');
+        this.readingScreen = document.getElementById('reading-screen');
+
+        this.uploadBtn = document.getElementById('upload-btn');
+        this.epubFileInput = document.getElementById('epub-file');
+        this.bookTitle = document.getElementById('book-title');
+        this.tocList = document.getElementById('toc-list');
+        this.backBtn = document.getElementById('back-btn');
+        this.chapterContent = document.getElementById('chapter-content');
+    }
+
+    attachEventListeners() {
+        this.uploadBtn.addEventListener('click', () => {
+            this.epubFileInput.click();
+        });
+
+        this.epubFileInput.addEventListener('change', (event) => {
+            this.handleFileUpload(event);
+        });
+
+        this.backBtn.addEventListener('click', () => {
+            this.showScreen('toc');
+        });
+    }
+
+    async handleFileUpload(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        try {
+            const arrayBuffer = await file.arrayBuffer();
+            this.book = ePub(arrayBuffer);
+
+            await this.book.ready;
+            await this.loadTableOfContents();
+            this.showScreen('toc');
+        } catch (error) {
+            console.error('Error loading EPUB:', error);
+            alert('Error loading EPUB file. Please try again with a valid EPUB file.');
+        }
+    }
+
+    async loadTableOfContents() {
+        try {
+            const navigation = await this.book.loaded.navigation;
+
+            // Set book title
+            const metadata = await this.book.loaded.metadata;
+            this.bookTitle.textContent = metadata.title || 'Table of Contents';
+
+            // Clear existing TOC
+            this.tocList.innerHTML = '';
+
+            // Build TOC
+            this.buildTocItems(navigation.toc, this.tocList);
+
+        } catch (error) {
+            console.error('Error loading table of contents:', error);
+            this.tocList.innerHTML = '<p>Error loading table of contents</p>';
+        }
+    }
+
+    buildTocItems(tocItems, container, level = 0) {
+        tocItems.forEach(item => {
+            const tocItem = document.createElement('div');
+            tocItem.className = 'toc-item' + (level > 0 ? ' sub-chapter' : '');
+
+            const title = document.createElement('h3');
+            title.textContent = item.label;
+            tocItem.appendChild(title);
+
+            tocItem.addEventListener('click', () => {
+                this.loadChapter(item.href);
+            });
+
+            container.appendChild(tocItem);
+
+            // Add sub-items if they exist
+            if (item.subitems && item.subitems.length > 0) {
+                this.buildTocItems(item.subitems, container, level + 1);
+            }
+        });
+    }
+
+    async loadChapter(href) {
+        try {
+            const section = this.book.spine.get(href);
+            const contents = await section.load(this.book.load.bind(this.book));
+
+            // Get the HTML content
+            const serializer = new XMLSerializer();
+            const htmlString = serializer.serializeToString(contents);
+
+            // Create a temporary div to process the content
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = htmlString;
+
+            // Remove script tags for security
+            const scripts = tempDiv.querySelectorAll('script');
+            scripts.forEach(script => script.remove());
+
+            // Update image sources to work with the EPUB
+            const images = tempDiv.querySelectorAll('img');
+            images.forEach(async (img) => {
+                const src = img.getAttribute('src');
+                if (src) {
+                    try {
+                        const imageUrl = await this.book.archive.createUrl(src, {base64: false});
+                        img.src = imageUrl;
+                    } catch (error) {
+                        console.warn('Could not load image:', src);
+                    }
+                }
+            });
+
+            // Set the chapter content
+            this.chapterContent.innerHTML = tempDiv.innerHTML;
+
+            // Show the reading screen
+            this.showScreen('reading');
+
+            // Scroll to top
+            window.scrollTo(0, 0);
+
+        } catch (error) {
+            console.error('Error loading chapter:', error);
+            this.chapterContent.innerHTML = '<p>Error loading chapter content.</p>';
+            this.showScreen('reading');
+        }
+    }
+
+    showScreen(screenName) {
+        // Hide all screens
+        document.querySelectorAll('.screen').forEach(screen => {
+            screen.classList.remove('active');
+        });
+
+        // Show the requested screen
+        switch (screenName) {
+            case 'upload':
+                this.uploadScreen.classList.add('active');
+                break;
+            case 'toc':
+                this.tocScreen.classList.add('active');
+                break;
+            case 'reading':
+                this.readingScreen.classList.add('active');
+                break;
+        }
+
+        this.currentScreen = screenName;
+    }
+}
+
+// Initialize the EPUB reader when the page loads
+document.addEventListener('DOMContentLoaded', () => {
+    new EpubReader();
+});

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EPUB Reader</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <script src="https://cdn.jsdelivr.net/npm/jszip@3/dist/jszip.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/epubjs/dist/epub.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Upload Screen -->
+    <div id="upload-screen" class="screen active">
+        <div class="upload-container">
+            <h1>EPUB Reader</h1>
+            <div class="upload-area">
+                <input type="file" id="epub-file" accept=".epub" hidden>
+                <button id="upload-btn" class="upload-button">
+                    Select EPUB File
+                </button>
+                <p class="upload-text">Choose an EPUB file to start reading</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Table of Contents Screen -->
+    <div id="toc-screen" class="screen">
+        <div class="toc-container">
+            <h1 id="book-title">Table of Contents</h1>
+            <div id="toc-list" class="toc-list">
+                <!-- TOC items will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Reading Screen -->
+    <div id="reading-screen" class="screen">
+        <div class="reading-header">
+            <button id="back-btn" class="back-button">← Back to Contents</button>
+        </div>
+        <div id="chapter-content" class="chapter-content">
+            <!-- Chapter content will be displayed here -->
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
